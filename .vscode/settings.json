@@ -1,0 +1,7 @@
+{
+    "C_Cpp.intelliSenseEngineFallback": "Disabled",
+    "git.ignoreLimitWarning": true,
+    "files.associations": {
+        "cmath": "c"
+    }
+}
