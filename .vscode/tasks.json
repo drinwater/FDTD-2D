@@ -9,8 +9,6 @@
 				"-fdiagnostics-color=always",
 				"-g",
 				"${file}",
-				"-Wl",
-				"--stack,10000000",
 				"-o",
 				"${fileDirname}\\${fileBasenameNoExtension}.exe"
 			],

@@ -49,32 +49,6 @@ int fdtd2d(const double Nx,const double Ny,double dx, double dy,double Nt,double
         }
     }
 
-    //UR2 = musrcint*(1-UR2) + ur*UR2;
-    //Exx, Eyy, Ezz
-    FILE *fp = fopen("Edata.txt", "w");
-    printf("gshgshg\n");
-    if (fp == NULL)
-    {
-        printf("Error opening the file %s", "Edata.txt");
-        return -1;
-    }
-    printf("File opened\n");
-    // write to the text file
-    for (int i= 0; i< Nxsize; i++)
-    {
-        for (int l = 0; l < Nysize; l++)
-        {   
-            
-            fprintf(fp, "%f\t", ERzz[i*Nxsize + l]);
-        }
-        fprintf(fp,"\n");
-    }
-    printf("written\n");
-    // close the file
-    fclose(fp);
-    printf("plotting\n");
-    //system("gnuplot -p -e \"set xrange[0:149];set yrange[0:149];set cbrange[-2:2];set palette defined (-2 'blue', 0 'white', 2 'red');plot 'Edata.txt' matrix with image;\"");
-    
     //Source stuff
     printf("Source computing\n");
     double dt = 1/(Nt*freq);
@@ -102,41 +76,6 @@ int fdtd2d(const double Nx,const double Ny,double dx, double dy,double Nt,double
     }
     printf("Source computed\n");
 
-    FILE *fp0 = fopen("source.txt", "w");
-    printf("gshgshg\n");
-    if (fp0 == NULL)
-    {
-        printf("Error opening the file %s", "Edata.txt");
-        return -1;
-    }
-    printf("File opened\n");
-    // write to the text file
-    for (int i= 0; i< steps; i++)
-    {  
-            
-        fprintf(fp0, "%.10f\t%.10f",  t[i],Ezsrcint[i]);
-        fprintf(fp0,"\n");
-    }
-    printf("written\n");
-    // close the file
-    fclose(fp0);
-    FILE *fp3 = fopen("t.txt", "w");
-    printf("gshgshg\n");
-    if (fp3 == NULL)
-    {
-        printf("Error opening the file %s", "Edata.txt");
-        return -1;
-    }
-    printf("File opened\n");
-    // write to the text file
-    for (int i= 0; i< steps; i++)
-    {  
-            
-        fprintf(fp3, "%f\t", t[i]);
-    }
-    printf("written\n");
-    // close the file
-    fclose(fp3);
     //PML
     printf("PML computing\n");
     double sigx[Nx2][Ny2];
@@ -410,14 +349,15 @@ int fdtd2d(const double Nx,const double Ny,double dx, double dy,double Nt,double
         //Inject source to the curl of E
         //printf("%0.50f\n",Ezsrcint[T]);
         for (index1 = 1; index1 < Nxsize; index1++){
-            *(CEx + index1*Nysize + srcint-1) = (*(CEx + index1*Nysize + srcint) - *(CEx + index1*Nysize + srcint-1))/dy - Ezsrcint[T]/dy;     
+            double test = (*(Ez + index1*Nysize + srcint) - *(Ez + index1*Nysize + srcint-1))/dy - Ezsrcint[T]/dy;     
+            *(CEx + index1*Nysize + srcint-1) = test;
         }
         
         for (index2 = 0; index2 < Nysize; index2++){
             for (index1 = 0; index1 < Nxsize-1; index1++){
-                *(CEy + index1*Nysize + index2) = - (*(CEy + (index1+1)*Nysize + index2) - *(CEy + index1*Nysize + index2))/dx;
+                *(CEy + index1*Nysize + index2) = - (*(Ez + (index1+1)*Nysize + index2) - *(Ez + index1*Nysize + index2))/dx;
             }
-            *(CEy + Nxsize + index2) = - (0 - *(CEy + Nxsize + index2))/dx;
+            *(CEy + Nxsize + index2) = - (0 - *(Ez + Nxsize + index2))/dx;
         }
         //printf("%.50f\n",*(CEy + 75*Nysize + 75));
         //Update H integrations
@@ -513,6 +453,36 @@ int fdtd2d(const double Nx,const double Ny,double dx, double dy,double Nt,double
         //system(command);
     }
     return 0;
+    free(ERzz);
+    free(URxx);
+    free(URyy);
+    free(sigDx);
+    free(sigDy);
+    free(sigHx);
+    free(sigHy);
+    free(mHx0);
+    free(mHx1);
+    free(mHx2);
+    free(mHx3);
+    free(mDz0);
+    free(mDz1);
+    free(mDz2);
+    free(mDz4);
+    free(mHy0);
+    free(mHy1);
+    free(mHy2);
+    free(mHy3);
+    free(CEx);
+    free(CEy);
+    free(Ez);
+    free(Hx);
+    free(Hy);
+    free(CHz);
+    free(IDz);
+    free(Dz);
+    free(ICEx);
+    free(ICEy);
+    //system("gnuplot \"load ./data/out.plt\"");
 }
     
 void main(){
@@ -520,7 +490,9 @@ void main(){
     double b = 0.00000005;
     float l = b;
     printf("Starting program\n");
-    //int errorcode = fdtd2d(300e-9,300e-9,2e-9,2e-9,10,1e6,25e-9,l,b,-2,-2 , 1, 1e8, 1, 1,80e-9);
-    //printf("Errorcode:%d",errorcode);
-    //getchar();
+    int errorcode = fdtd2d(300e-9,300e-9,1e-9,1e-9,10,1e6,25e-9,l,b,-2,-2 , 1, 1e8, 1, 1,40e-9);
+    printf("Errorcode:%d",errorcode);
+    system("gnuplot C:/Users/12269/Documents/Github/FDTD-2D/data/out.plt");
+    printf("press a key and hit enter");
+    getchar();
 }
