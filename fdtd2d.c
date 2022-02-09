@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <windows.h>
 #include <stdlib.h>
 
 int fdtd2d(const double Nx,const double Ny,double dx, double dy,double Nt,double df, double r,float l,float b, double ur,double er,double nbc,double freq,double epssrcint,double musrcint,double src){
+    
     int NPML[4] = {20,20,20,20};
     const int Nxsize = ceil(Nx/dx);
     const int Nysize = ceil(Ny/dy);
@@ -88,14 +90,14 @@ int fdtd2d(const double Nx,const double Ny,double dx, double dy,double Nt,double
         double nx1 = 2*NPML[1] - nx + 1;
         for (int i = 0; i < Ny2; i++)
         {
-            sigx[nx][i] = (0.5*e0/dt)*pow((nx/2/NPML[1]),3);
+            sigx[nx][i] = (0.5*e0/dt)*pow((nx/(2*NPML[1])),3);
         }
     }  
     for(int nx = 1; nx<=2*NPML[2];nx++){
         double nx1 = Nx2 - 2*NPML[2] + nx;
         for (int i = 0; i < Ny2; i++)
         {
-            sigx[nx][i] = (0.5*e0/dt)*pow((nx/2/NPML[2]),3);
+            sigx[nx][i] = (0.5*e0/dt)*pow((nx/(2*NPML[2])),3);
         }
     }
     double sigy[Nx2][Ny2];
@@ -107,13 +109,13 @@ int fdtd2d(const double Nx,const double Ny,double dx, double dy,double Nt,double
     for(int nx = 1; nx<=2*NPML[3];nx++){
         double ny1 = 2*NPML[3] - ny + 1;
         for (int f=0;f<Ny2;f++){
-            sigy[f][nx] = (0.5*e0/dt)*pow((ny/2/NPML[3]),3);
+            sigy[f][nx] = (0.5*e0/dt)*pow((ny/(2*NPML[3])),3);
         }
     }
     for(int nx = 1; nx<=2*NPML[4];nx++){
         double ny1 = Ny2 - 2*NPML[4] + ny;
         for (int f=0;f<Ny2;f++){
-            sigy[f][nx] = (0.5*e0/dt)*pow((ny/2/NPML[4]),3);
+            sigy[f][nx] = (0.5*e0/dt)*pow((ny/(2*NPML[4])),3);
         }
     }
     printf("PML computed\n");
@@ -336,6 +338,7 @@ int fdtd2d(const double Nx,const double Ny,double dx, double dy,double Nt,double
     
     int index1=0, index2 = 0;
     printf("Entering loop, T = %d\n", T);
+    CreateDirectory (".\\data", NULL);
     for(T = 0; T<=steps; T++){
         //Find Curl of Ex and Ey
         for (index1 = 0; index1 < Nxsize; index1++){
@@ -487,12 +490,12 @@ int fdtd2d(const double Nx,const double Ny,double dx, double dy,double Nt,double
     
 void main(){
     double NPML[] = {20, 20, 20, 20};
-    double b = 0.00000005;
+    double b = 0.0000001;
     float l = b;
     printf("Starting program\n");
-    int errorcode = fdtd2d(300e-9,300e-9,1e-9,1e-9,10,1e6,25e-9,l,b,-2,-2 , 1, 1e8, 1, 1,40e-9);
+    int errorcode = fdtd2d(1000e-9,1000e-9,1e-9,1e-9,10,1e6,25e-9,l,b,-2,-2 , 1, 1e8, 1, 1,350e-9);
     printf("Errorcode:%d",errorcode);
-    system("gnuplot C:/Users/12269/Documents/Github/FDTD-2D/data/out.plt");
+    system("gnuplot C:/Users/12269/Documents/Github/FDTD-2D/out.plt");
     printf("press a key and hit enter");
     getchar();
 }
